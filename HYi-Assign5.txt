@@ -1,0 +1,228 @@
+
+1. How many containers of antibiotics are currently available?
+Output:
+╭────────────╮
+│ containers │
+╞════════════╡
+│        100 │
+╰────────────╯
+
+Explanation:
+This query looks at the item.itemDescription for rows that contain antibiotics. 
+SUM adds up quantityOnHand for these rows and shows the total as containers
+
+2. Which volunteer(s), if any, have phone numbers that do not start with the number 2 and whose last name is not Jones. Query should retrieve names rather than ids. 
+Output:
+╭───────────────╮
+│ volunteerName │
+╞═══════════════╡
+│ Gene Lewin    │
+╰───────────────╯
+
+Explanation:
+This query checks volunteerTelephone with NOT LIKE to find phone numbers that don't start with 2 and 
+checks volunteerName with NOT LIKE to check it doesn't end with a space followed by Jones
+
+3.  Which volunteer(s) are working on transporting tasks? Query should retrieve names rather than ids
+Output:
+╭───────────────╮
+│ volunteerName │
+╞═══════════════╡
+│ George Brewer │
+╰───────────────╯
+
+Explanation:
+The JOINS match volunteer-assignment by volunteerId, assignment-task by taskCode, task-task_type by taskTypeId,
+and checks if taskTypeName equals 'transporting' and shows 
+the volunteer's name that matches this row.
+
+4.  Which task(s) have yet to be assigned to any volunteers (provide task descriptions, not the
+codes)? 
+Output:
+╭────────────────────────────────╮
+│        taskDescription         │
+╞════════════════════════════════╡
+│ Prepare 100 food packages      │
+│ Take packages to the warehouse │
+╰────────────────────────────────╯
+
+Explanation:
+To check which tasks have not been assigned volunteers,
+LEFT JOIN matches task to assignment by taskCode. It displays
+the task.taskDescription where the assignment.taskCode is considered
+NULL. 
+
+5. Which type(s) of package contain some kind of bottle?
+Output:
+╭────────────────╮
+│  packageType   │
+╞════════════════╡
+│ food and water │
+╰────────────────╯
+
+
+Explanation:
+The JOINs connect package-package_type(packageTypeId)-package_contents(packageId)-item (itemId). 
+It checks whether item.itemDescription contains bottle by 
+doing LIKE %bottle% and displays matching package type name
+
+
+6. Which items, if any, are not in any packages? Answer should be item descriptions. 
+Output:
+╭───────────────────────╮
+│    itemDescription    │
+╞═══════════════════════╡
+│ bottle of antibiotics │
+│ bottle of aspirin     │
+│ flashlight            │
+│ pack of bandages      │
+╰───────────────────────╯
+
+Explanation:
+LEFT JOIN matches item to package_contents by itemId.
+It displays itemDescription where packageId is null, which
+means that the item appears in no package
+
+7. Which task(s) are assigned to volunteer(s) that live in New Jersey (NJ)? Answer should have the task description and not the task ids.
+Output:
+╭────────────────────────────────╮
+│        taskDescription         │
+╞════════════════════════════════╡
+│ Prepare 20 children's packages │
+│ Prepare 100 water packages     │
+│ Prepare 5,000 packages         │
+╰────────────────────────────────╯
+
+Explanation:
+The JOINS match task-assignment(taskCode)-volunteer(volunteerId).
+It checks whether volunteerAddress ends in NJ using LIKE '%NJ'
+and displays the matching taskDescription
+
+8. Which volunteers began their assignments in the first half of 2021? Answer should have the volunteer names and not their ids
+Output:
+╭───────────────╮
+│ volunteerName │
+╞═══════════════╡
+│ Joan Simmons  │
+│ Chris Jordan  │
+╰───────────────╯
+
+Explanation:
+The JOIN matches volunteer-assignment(volunteerId) together.
+The query handles assignments with startdateTime that is on
+or after Jan 1 and before Jul 1 2021. It then displays
+the matching volunteer names for those assignment dates
+
+
+9. Which volunteers have been assigned to tasks that include packing spam? Answer should have
+the volunteer names and not their ids.
+Output:
+╭───────────────╮
+│ volunteerName │
+╞═══════════════╡
+│ Julie White   │
+│ Gerry Banks   │
+╰───────────────╯
+
+Explanation:
+The JOINS match volunteer-assignment(volunteerId)-package(taskCode)-package_contents(packageId)-items(itemId).
+It handles only rows with the itemDescription of 'can of spam,' and
+displays the mtaching volunteer name
+
+10. Which item(s) (if any) have a total value of exactly $100 in one package? Answer should be item descriptions.
+Output:
+╭─────────────────╮
+│ itemDescription │
+╞═════════════════╡
+│ Baby formula    │
+╰─────────────────╯
+
+Explanation:
+The JOIN matches item to package_contents by itemId,
+and checks for when package_contents.itemQuantity multiplied by item.itemValue
+equates to 100. It displays the matching 
+item description. 
+
+11. How many volunteers are assigned to tasks with each different status? The answer should show each different status and the number of volunteers sorted from highest to lowest.
+Output:
+╭────────────────┬────────────────╮
+│ taskStatusName │ volunteerCount │
+╞════════════════╪════════════════╡
+│ open           │              4 │
+│ closed         │              3 │
+│ ongoing        │              2 │
+│ pending        │              1 │
+╰────────────────┴────────────────╯
+
+Explanation:
+The LEFT JOINs match task_status-task(taskStatusId)-assignment(taskCode). 
+The query uses GROUP BY to group taskStatusId and taskStatusName.
+It then displays the counted distinct volunteer IDs as volunteerCount alongside
+the taskStatusName, ordered from highest to lowest
+
+12. Which task creates the heaviest set of packages and what is the weight? Show both the taskCode and the weight (You should be able to do this without using any sub-queries).
+Output:
+╭──────────┬─────────────╮
+│ taskCode │ totalWeight │
+╞══════════╪═════════════╡
+│      106 │       308.0 │
+╰──────────┴─────────────╯
+
+Explanation:
+This query groups rows in the package table by
+taskCode. It adds the packageWeight for each group and
+sorts it from heaviest to lightest. It then
+displays the taskCode and the totalWeight (which is found through the SUM).
+LIMIT 1 returns only the single task with the highest 
+totalWeight.
+
+13. How many tasks are there that do not have a type of "packing"?
+Output:
+╭───────────╮
+│ taskCount │
+╞═══════════╡
+│         3 │
+╰───────────╯
+
+Explanation:
+The JOIN matches task-task_type by takTypeId. It excludes any rows where
+the taskTypeName is 'packing' and counts the remaining tasks and displays
+it as taskCount. 
+
+14.  Of those items that have been packed, which item (or items) were touched by fewer than 3
+volunteers? Answer should be item descriptions.
+Output:
+╭─────────────────╮
+│ itemDescription │
+╞═════════════════╡
+│ can of spam     │
+│ dried fruit     │
+│ men's coat      │
+│ sleeping bag    │
+│ tent            │
+│ women's coat    │
+╰─────────────────╯
+
+Explanation:
+The JOINs match item-package_contents(itemId)-package(packageId) and LEFT JOINs package to 
+assignment by taskCode. It groups by the item.itemId and item.itemDescription. 
+HAVING ensures that we keep item groups with the count of distinct volunteerId values less
+than 3. It then displays the matching itemDescription. 
+
+15. Which packages have a total value of more than 100? Show the packageIds and their value sorted from lowest to highest 
+Output:
+╭───────────┬────────────╮
+│ packageId │ totalValue │
+╞═══════════╪════════════╡
+│         6 │      150.0 │
+│         2 │      151.0 │
+│         4 │      350.0 │
+│        10 │      750.0 │
+│         5 │     1420.0 │
+╰───────────┴────────────╯
+
+Explanation: 
+The JOIN matches package_contents-item(itemId)and groups by packageId.
+HAVING ensures that the sum of the product of itemQuantity and itemValue is 
+over 100. It then displays the packageId and the sum (i.e., totalValue)
+which is greater than 100. This is sorted from lowest to highest. 
